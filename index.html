@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>BN Jha College · Deoghar</title>
+    <!-- Apple PWA meta -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="BN Jha College">
+    <meta name="theme-color" id="theme-color" content="#f8f9fa">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' fill='%230066cc'/%3E%3Ctext x='50%25' y='50%25' font-size='96' text-anchor='middle' dy='.3em' fill='white' font-family='-apple-system'%3E📚%3C/text%3E%3C/svg%3E">
+    <!-- SweetAlert2, FontAwesome, Animate.css -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* Apple system font stack */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.5;
+            transition: background-color 0.25s ease, color 0.2s ease;
+            min-height: 100vh;
+        }
+
+        /* Light theme (default) */
+        :root {
+            --bg-primary: #f8f9fa;
+            --bg-secondary: #ffffff;
+            --text-primary: #1d1d1f;
+            --text-secondary: #4a4a4e;
+            --card-bg: #ffffff;
+            --border-light: #e6e6e8;
+            --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.04);
+            --hover-lift: translateY(-2px);
+            --navbar-bg: rgba(255,255,255,0.82);
+            --backdrop: rgba(0,0,0,0.3);
+            --menu-bg: #ffffff;
+            --icon-color: #4a4a4e;
+        }
+
+        /* Dark theme */
+        body.dark {
+            --bg-primary: #1c1c1e;
+            --bg-secondary: #2c2c2e;
+            --text-primary: #f5f5f7;
+            --text-secondary: #b0b0b6;
+            --card-bg: #2c2c2e;
+            --border-light: #3a3a3c;
+            --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.3);
+            --navbar-bg: rgba(40, 40, 42, 0.82);
+            --backdrop: rgba(0,0,0,0.6);
+            --menu-bg: #2c2c2e;
+            --icon-color: #b0b0b6;
+        }
+
+        /* Splash screen */
+        #splash {
+            position: fixed;
+            inset: 0;
+            background: var(--bg-secondary);
+            z-index: 2000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.4s ease;
+            pointer-events: none;
+        }
+        #splash.fade-out {
+            opacity: 0;
+        }
+        .splash-title {
+            font-size: 2.2rem;
+            font-weight: 500;
+            letter-spacing: -0.02em;
+            color: var(--text-primary);
+            margin-bottom: 1.2rem;
+        }
+        .dot-container {
+            display: flex;
+            gap: 10px;
+        }
+        .dot {
+            width: 10px;
+            height: 10px;
+            background-color: var(--text-secondary);
+            border-radius: 50%;
+            opacity: 0.3;
+            animation: dotPulse 1.4s infinite;
+        }
+        .dot:nth-child(2) { animation-delay: 0.2s; }
+        .dot:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes dotPulse {
+            0%, 80%, 100% { opacity: 0.2; transform: scale(1); }
+            40% { opacity: 1; transform: scale(1.2); }
+        }
+
+        /* Main content (hidden initially) */
+        #main-content {
+            display: none;
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 0 20px 30px;
+        }
+
+        /* Navbar */
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 0;
+            background-color: var(--navbar-bg);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-radius: 0 0 16px 16px;
+            margin-bottom: 24px;
+        }
+        .nav-left, .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+        }
+        .nav-center {
+            font-weight: 500;
+            font-size: 1.3rem;
+            letter-spacing: -0.01em;
+            color: var(--text-primary);
+        }
+        .hamburger, .theme-toggle {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--icon-color);
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 50%;
+            transition: background 0.2s;
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .hamburger:hover, .theme-toggle:hover {
+            background-color: var(--border-light);
+        }
+
+        /* Hamburger menu (offcanvas) */
+        .menu-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--backdrop);
+            z-index: 300;
+            visibility: hidden;
+            opacity: 0;
+            transition: opacity 0.2s ease, visibility 0.2s;
+        }
+        .menu-panel {
+            position: fixed;
+            top: 0;
+            left: -280px;
+            width: 260px;
+            height: 100%;
+            background-color: var(--menu-bg);
+            box-shadow: var(--shadow-sm);
+            transition: left 0.25s ease;
+            z-index: 310;
+            padding: 30px 20px;
+            border-radius: 0 20px 20px 0;
+        }
+        .menu-overlay.active {
+            visibility: visible;
+            opacity: 1;
+        }
+        .menu-overlay.active .menu-panel {
+            left: 0;
+        }
+        .menu-item {
+            list-style: none;
+            margin: 20px 0;
+        }
+        .menu-item a, .menu-item button {
+            text-decoration: none;
+            font-size: 1.2rem;
+            font-weight: 400;
+            color: var(--text-primary);
+            background: none;
+            border: none;
+            width: 100%;
+            text-align: left;
+            padding: 10px 0;
+            cursor: pointer;
+            border-bottom: 1px solid transparent;
+            transition: border-color 0.2s;
+        }
+        .menu-item a:hover, .menu-item button:hover {
+            border-bottom-color: var(--text-secondary);
+        }
+
+        /* principal section */
+        .principal-card {
+            background-color: var(--card-bg);
+            border-radius: 20px;
+            padding: 32px 24px;
+            box-shadow: var(--shadow-sm);
+            margin-bottom: 30px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .principal-card:hover {
+            transform: var(--hover-lift);
+            box-shadow: 0 12px 24px rgba(0,0,0,0.08);
+        }
+        .principal-img {
+            width: 140px;
+            height: 140px;
+            border-radius: 50%;
+            object-fit: contain;
+            background: #f0f0f4;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+            margin: 0 auto 16px;
+            display: block;
+            border: 3px solid var(--bg-secondary);
+        }
+        .principal-name {
+            font-size: 1.6rem;
+            font-weight: 500;
+            text-align: center;
+            margin-bottom: 4px;
+        }
+        .principal-title {
+            text-align: center;
+            font-size: 1rem;
+            color: var(--text-secondary);
+            margin-bottom: 24px;
+            letter-spacing: 0.3px;
+        }
+        .greeting-text {
+            font-size: 1rem;
+            color: var(--text-secondary);
+            max-width: 700px;
+            margin: 0 auto;
+            line-height: 1.7;
+        }
+
+        /* college description */
+        .desc-section {
+            background-color: var(--card-bg);
+            border-radius: 20px;
+            padding: 30px 24px;
+            box-shadow: var(--shadow-sm);
+            margin-bottom: 30px;
+        }
+        .desc-section h2 {
+            font-weight: 500;
+            margin-bottom: 16px;
+            font-size: 1.8rem;
+        }
+        .desc-section p {
+            margin-bottom: 1.2rem;
+            color: var(--text-secondary);
+        }
+
+        /* footer */
+        .footer {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            padding: 30px 0 20px;
+            border-top: 1px solid var(--border-light);
+        }
+        .footer a {
+            color: var(--icon-color);
+            font-size: 2rem;
+            transition: transform 0.15s, color 0.2s;
+        }
+        .footer a:hover {
+            transform: scale(1.05);
+            color: #0066cc;
+        }
+
+        /* responsive */
+        @media (max-width: 600px) {
+            .splash-title { font-size: 1.8rem; }
+            .navbar { padding: 12px 0; }
+            .principal-img { width: 120px; height: 120px; }
+        }
+
+        /* helper */
+        .text-center { text-align: center; }
+    </style>
+</head>
+<body>
+    <!-- SPLASH SCREEN -->
+    <div id="splash">
+        <div class="splash-title animate__animated animate__fadeInUp">BN Jha College Deoghar</div>
+        <div class="dot-container">
+            <span class="dot"></span>
+            <span class="dot"></span>
+            <span class="dot"></span>
+        </div>
+    </div>
+
+    <!-- MAIN CONTENT (hidden until splash ends) -->
+    <div id="main-content">
+        <!-- Navbar -->
+        <nav class="navbar">
+            <div class="nav-left">
+                <button class="hamburger" id="hamburgerBtn" aria-label="Menu"><i class="fas fa-bars"></i></button>
+            </div>
+            <div class="nav-center">BN Jha College</div>
+            <div class="nav-right">
+                <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme"><i class="fas fa-sun"></i></button>
+            </div>
+        </nav>
+
+        <!-- Principal section -->
+        <div class="principal-card">
+            <img src="https://i.postimg.cc/zvrPGFNz/1000009362-removebg-preview.png" alt="Principal" class="principal-img" onerror="this.src='data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22140%22%20height%3D%22140%22%20viewBox%3D%220%200%20140%20140%22%3E%3Ccircle%20cx%3D%2270%22%20cy%3D%2270%22%20r%3D%2265%22%20fill%3D%22%23e0e0e0%22%2F%3E%3Ctext%20x%3D%2270%22%20y%3D%2285%22%20font-size%3D%2230%22%20text-anchor%3D%22middle%22%20fill%3D%22%23666%22%3E👤%3C%2Ftext%3E%3C%2Fsvg%3E'">
+            <div class="principal-name">Manoj Kumar Mathpati</div>
+            <div class="principal-title">Principal</div>
+            <div class="greeting-text">
+                <p>Dear Students and Guardians,</p><br>
+                <p>Welcome to BN Jha College, Deoghar – a sanctuary of learning affiliated to JAC Ranchi. It is my privilege to lead an institution where discipline and academic excellence walk hand in hand. Our classrooms echo with curiosity, and our laboratories hum with discovery. I firmly believe that education shapes not just careers, but character. Here, every student is nurtured to embrace moral values, critical thinking, and resilience.</p><br>
+                <p>We follow a holistic approach: rigorous academics in IA, ISC, and ICOM streams, complemented by personality development and ethical grounding. Our dedicated faculty – from Biology to Commerce – work tirelessly to bring out the best in each learner. The library, with its vast resources, and the well-equipped labs are your gateways to deeper understanding.</p><br>
+                <p>As you walk the corridors of BN Jha, remember that success is the natural outcome of discipline and hard work. Let us together build a future rooted in knowledge and humanity. I wish you a fulfilling journey ahead.</p><br>
+                <p>With warm regards,<br><strong>Manoj Kumar Mathpati</strong></p>
+            </div>
+        </div>
+
+        <!-- College Description (500 words professional) -->
+        <div class="desc-section">
+            <h2>Vision & Excellence at BN Jha College</h2>
+            <p>Established under the esteemed Jharkhand Academic Council (JAC) Ranchi, BN Jha College, Deoghar stands as a pillar of quality higher secondary education. Our institution is driven by a clear vision: to cultivate young minds into responsible citizens and future leaders. We offer three specialized streams – IA (Intermediate Arts), ISC (Science), and ICOM (Commerce) – for classes 11th and 12th, ensuring a broad spectrum of academic choices.</p>
+            <p><strong>Mission:</strong> To provide an environment where intellectual growth merges with ethical grounding. We believe that education must go beyond textbooks – it must ignite curiosity and build character. Our mission is to make learning a joyful, transformative experience.</p>
+            <p><strong>Academic Rigor & Streams:</strong> In IA, we emphasize humanities, literature, and social sciences, taught by passionate educators. The ISC stream (Science) offers Physics, Chemistry, Biology, and Mathematics with practical lab sessions. ICOM (Commerce) introduces students to business, accountancy, and economics – taught by senior Commerce teachers who bring real-world insights. Every classroom is equipped with modern aids to make concepts clear.</p>
+            <p><strong>Dedicated Faculty (by subject):</strong> Our teachers are the backbone. The Biology teacher makes life sciences fascinating through diagrams and field discussions. The Sanskrit teacher connects ancient wisdom to modern life. Chemistry and Physics teachers simplify complex theories. In Commerce, our experts guide students through markets and ledgers. All educators hold advanced degrees and share a common goal: student success.</p>
+            <p><strong>Infrastructure & Facilities:</strong> Spread over a peaceful campus, BN Jha College features spacious, well-ventilated classrooms, a rich library with reference materials and journals, and fully equipped laboratories for Physics, Chemistry, and Biology. The library is a quiet haven for research and reading. We also maintain a dedicated computer lab for practical learning.</p>
+            <p><strong>Holistic Development:</strong> We regularly organize workshops, moral value sessions, and career counseling. Students are encouraged to participate in debates, cultural events, and sports – because we believe in nurturing the whole person. Discipline is woven into daily routine, yet the atmosphere remains warm and supportive.</p>
+            <p><strong>Examination Results & Character Building:</strong> Our consistent board examination results reflect the hard work of students and teachers. But more than marks, we take pride in the strong character of our alumni – many have become doctors, chartered accountants, civil servants, and, above all, good human beings. We emphasize honesty, punctuality, and respect for all.</p>
+            <p>BN Jha College is not just a place to study; it is a community that shapes futures. We invite you to be part of this journey toward knowledge, values, and success.</p>
+        </div>
+
+        <!-- Footer with social icons -->
+        <footer class="footer">
+            <a href="https://instagram.com/anshurajhans" target="_blank" rel="noopener" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+            <a href="https://whatsapp.com/channel/0029VbBBNmJ2ER6puLp12l1n" target="_blank" rel="noopener" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+        </footer>
+    </div>
+
+    <!-- Hamburger menu overlay -->
+    <div class="menu-overlay" id="menuOverlay">
+        <div class="menu-panel">
+            <ul style="list-style: none;">
+                <li class="menu-item"><a href="index.html"><i class="fas fa-home" style="width: 28px;"></i> Home</a></li>
+                <li class="menu-item"><a href="pen.html"><i class="fas fa-pen" style="width: 28px;"></i> PEN</a></li>
+                <li class="menu-item"><a href="notes.html"><i class="fas fa-book" style="width: 28px;"></i> NOTES</a></li>
+                <li class="menu-item"><a href="notice.html"><i class="fas fa-bullhorn" style="width: 28px;"></i> NOTICE</a></li>
+                <li class="menu-item"><button id="settingMenuBtn"><i class="fas fa-cog" style="width: 28px;"></i> SETTING</button></li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- PWA manifest & service worker (blob inline) + script -->
+    <script>
+        (function() {
+            // --- THEME MANAGEMENT (localStorage + toggle) ---
+            const themeToggle = document.getElementById('themeToggle');
+            const themeColorMeta = document.getElementById('theme-color');
+            const htmlEl = document.documentElement; // or body class
+            const body = document.body;
+
+            function setTheme(theme) {
+                if (theme === 'dark') {
+                    body.classList.add('dark');
+                    themeToggle.innerHTML = '<i class="fas fa-moon"></i>';
+                    themeColorMeta.setAttribute('content', '#1c1c1e');
+                    localStorage.setItem('theme', 'dark');
+                } else {
+                    body.classList.remove('dark');
+                    themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
+                    themeColorMeta.setAttribute('content', '#f8f9fa');
+                    localStorage.setItem('theme', 'light');
+                }
+            }
+
+            // initial theme from localStorage
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            setTheme(savedTheme);
+
+            themeToggle.addEventListener('click', () => {
+                const isDark = body.classList.contains('dark');
+                setTheme(isDark ? 'light' : 'dark');
+            });
+
+            // --- SPLASH SCREEN ---
+            const splash = document.getElementById('splash');
+            const mainContent = document.getElementById('main-content');
+            setTimeout(() => {
+                splash.classList.add('fade-out');
+                setTimeout(() => {
+                    splash.style.display = 'none';
+                    mainContent.style.display = 'block';
+                    // trigger welcome popup (first load only)
+                    if (!localStorage.getItem('welcomeShown')) {
+                        Swal.fire({
+                            title: '📘 BN Jha College',
+                            text: 'Welcome to version 1.0. Explore discipline, excellence & values.',
+                            icon: 'info',
+                            confirmButtonColor: '#0066cc',
+                            background: body.classList.contains('dark') ? '#2c2c2e' : '#fff',
+                            color: body.classList.contains('dark') ? '#f5f5f7' : '#1d1d1f'
+                        });
+                        localStorage.setItem('welcomeShown', 'true');
+                    }
+                }, 250);
+            }, 2500);
+
+            // --- HAMBURGER MENU ---
+            const hamburger = document.getElementById('hamburgerBtn');
+            const menuOverlay = document.getElementById('menuOverlay');
+            hamburger.addEventListener('click', () => {
+                menuOverlay.classList.toggle('active');
+            });
+            menuOverlay.addEventListener('click', (e) => {
+                if (e.target === menuOverlay) {
+                    menuOverlay.classList.remove('active');
+                }
+            });
+
+            // --- SETTING MODAL (SweetAlert2) ---
+            function openSettingsModal() {
+                const isDark = body.classList.contains('dark');
+                Swal.fire({
+                    title: '⚙️ Settings',
+                    html: `
+                        <div style="text-align: left; color: var(--text-primary);">
+                            <p><i class="fas fa-moon"></i> Dark mode: <strong>${isDark ? 'on' : 'off'}</strong></p>
+                        </div>
+                    `,
+                    showCancelButton: true,
+                    confirmButtonText: 'Toggle Dark Mode',
+                    cancelButtonText: 'Close',
+                    showDenyButton: true,
+                    denyButtonText: 'Clear Cache',
+                    background: body.classList.contains('dark') ? '#2c2c2e' : '#fff',
+                    color: body.classList.contains('dark') ? '#f5f5f7' : '#1d1d1f',
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Toggle dark mode
+                        setTheme(isDark ? 'light' : 'dark');
+                        openSettingsModal(); // re-open to reflect change
+                    } else if (result.isDenied) {
+                        // Clear cache (simulate)
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Cache cleared',
+                            text: 'Temporary files cleared (simulated).',
+                            timer: 1500,
+                            showConfirmButton: false,
+                            background: body.classList.contains('dark') ? '#2c2c2e' : '#fff',
+                            color: body.classList.contains('dark') ? '#f5f5f7' : '#1d1d1f',
+                        });
+                    }
+                });
+                // additional custom actions via swal mixin? but we can also add more buttons with preDeny. For simplicity, extra info:
+                // we can add 'App Info' option via another Swal? but requirement: options include Toggle, Clear, App Info, Version.
+                // We'll handle App Info with a separate button in the same modal? Better to use queue. Let's enhance:
+            }
+
+            // replace setting button click with advanced modal
+            document.getElementById('settingMenuBtn').addEventListener('click', (e) => {
+                e.preventDefault();
+                menuOverlay.classList.remove('active');
+                // show settings modal with all options
+                Swal.fire({
+                    title: '⚙️ Settings',
+                    html: `
+                        <div style="text-align: left;">
+                            <p><i class="fas fa-palette"></i> Theme: ${body.classList.contains('dark') ? 'Dark' : 'Light'}</p>
+                            <p><i class="fas fa-trash"></i> Clear cache</p>
+                            <p><i class="fas fa-info-circle"></i> App Info · Version 1.0</p>
+                        </div>
+                    `,
+                    showDenyButton: true,
+                    showCancelButton: true,
+                    confirmButtonText: 'Toggle Dark Mode',
+                    denyButtonText: 'Clear Cache',
+                    cancelButtonText: 'App Info',
+                    background: body.classList.contains('dark') ? '#2c2c2e' : '#fff',
+                    color: body.classList.contains('dark') ? '#f5f5f7' : '#1d1d1f',
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        setTheme(body.classList.contains('dark') ? 'light' : 'dark');
+                    } else if (result.isDenied) {
+                        Swal.fire('Cache cleared', 'Simulated cache clear', 'info');
+                    } else if (result.dismiss === Swal.DismissReason.cancel) {
+                        Swal.fire('BN Jha College v1.0', '📚 IA, ISC, ICOM · JAC Ranchi', 'info');
+                    }
+                });
+            });
+
+            // --- PWA MANIFEST (inline blob) ---
+            const manifestObj = {
+                name: "BN Jha College Deoghar",
+                short_name: "BN Jha",
+                description: "Academic hub for 11th & 12th (IA, ISC, ICOM)",
+                start_url: "index.html",
+                display: "standalone",
+                theme_color: body.classList.contains('dark') ? '#1c1c1e' : '#f8f9fa',
+                background_color: body.classList.contains('dark') ? '#1c1c1e' : '#f8f9fa',
+                icons: [{
+                    src: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' fill='%230066cc'/%3E%3Ctext x='50%25' y='50%25' font-size='96' text-anchor='middle' dy='.3em' fill='white' font-family='-apple-system'%3E📚%3C/text%3E%3C/svg%3E",
+                    sizes: "192x192",
+                    type: "image/svg+xml"
+                }]
+            };
+            const manifestBlob = new Blob([JSON.stringify(manifestObj)], { type: 'application/json' });
+            const manifestUrl = URL.createObjectURL(manifestBlob);
+            const linkManifest = document.createElement('link');
+            linkManifest.rel = 'manifest';
+            linkManifest.href = manifestUrl;
+            document.head.appendChild(linkManifest);
+
+            // --- SERVICE WORKER (inline blob) ---
+            if ('serviceWorker' in navigator) {
+                const swCode = `
+                    const CACHE_NAME = 'bnjha-cache-v1';
+                    const urlsToCache = ['index.html'];
+                    self.addEventListener('install', event => {
+                        event.waitUntil(
+                            caches.open(CACHE_NAME).then(cache => cache.addAll(urlsToCache))
+                        );
+                    });
+                    self.addEventListener('fetch', event => {
+                        event.respondWith(
+                            caches.match(event.request).then(response => response || fetch(event.request))
+                        );
+                    });
+                `;
+                const swBlob = new Blob([swCode], { type: 'application/javascript' });
+                const swUrl = URL.createObjectURL(swBlob);
+                navigator.serviceWorker.register(swUrl).catch(console.log);
+            }
+
+            // update theme-color when theme changes (already in setTheme)
+            // extend setTheme to update manifest? not needed.
+        })();
+    </script>
+    <!-- ensure theme toggle updates manifest theme color (already) -->
+</body>
+</html>

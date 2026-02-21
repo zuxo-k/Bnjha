@@ -1,0 +1,940 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student PEN Verification System</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-blue: #007AFF;
+            --soft-blue: #5AC8FA;
+            --silver: #F2F2F7;
+            --white: #FFFFFF;
+            --gray-1: #8E8E93;
+            --gray-2: #C7C7CC;
+            --gray-3: #D1D1D6;
+            --dark: #1D1D1F;
+            --success: #34C759;
+            --error: #FF3B30;
+            --glass-bg: rgba(255, 255, 255, 0.75);
+            --glass-border: rgba(255, 255, 255, 0.9);
+            --shadow: 0 8px 32px rgba(0, 0, 0, 0.04);
+            --shadow-soft: 0 4px 20px rgba(0, 122, 255, 0.08);
+            --radius: 20px;
+            --radius-small: 12px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4edf5 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: var(--dark);
+            line-height: 1.6;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 10% 20%, rgba(90, 200, 250, 0.05) 0%, transparent 20%),
+                radial-gradient(circle at 90% 80%, rgba(0, 122, 255, 0.05) 0%, transparent 20%);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .hero {
+            text-align: center;
+            margin-bottom: 40px;
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        .hero h1 {
+            font-size: 2.8rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #1D1D1F 0%, #007AFF 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 12px;
+            letter-spacing: -0.5px;
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            color: var(--gray-1);
+            font-weight: 400;
+            max-width: 500px;
+            margin: 0 auto 30px;
+        }
+
+        .glass-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border-radius: var(--radius);
+            border: 1px solid var(--glass-border);
+            box-shadow: var(--shadow);
+            padding: 40px;
+            position: relative;
+            overflow: hidden;
+            transition: var(--transition);
+        }
+
+        .glass-card::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, #007AFF, #5AC8FA, #007AFF);
+            z-index: -1;
+            border-radius: calc(var(--radius) + 2px);
+            opacity: 0;
+            transition: opacity 0.5s ease;
+            animation: glow 3s infinite linear;
+        }
+
+        .glass-card:hover::before {
+            opacity: 0.15;
+        }
+
+        @keyframes glow {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .form-section h2 {
+            font-size: 1.6rem;
+            font-weight: 600;
+            margin-bottom: 30px;
+            color: var(--dark);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .form-section h2 i {
+            color: var(--primary-blue);
+        }
+
+        .input-group {
+            margin-bottom: 24px;
+            position: relative;
+        }
+
+        .input-group label {
+            display: block;
+            font-size: 0.95rem;
+            font-weight: 500;
+            margin-bottom: 8px;
+            color: var(--dark);
+            padding-left: 4px;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .input-wrapper i {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--gray-2);
+            font-size: 1.1rem;
+            transition: var(--transition);
+            z-index: 1;
+        }
+
+        input {
+            width: 100%;
+            padding: 16px 16px 16px 48px;
+            font-size: 1rem;
+            border: 1.5px solid var(--gray-3);
+            border-radius: var(--radius-small);
+            background: var(--white);
+            transition: var(--transition);
+            color: var(--dark);
+            font-weight: 400;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--primary-blue);
+            box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.15);
+        }
+
+        input:focus + i {
+            color: var(--primary-blue);
+        }
+
+        input.error {
+            border-color: var(--error);
+            animation: shake 0.5s ease-in-out;
+        }
+
+        .error-message {
+            color: var(--error);
+            font-size: 0.85rem;
+            margin-top: 5px;
+            padding-left: 4px;
+            display: none;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+            20%, 40%, 60%, 80% { transform: translateX(5px); }
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            background: linear-gradient(135deg, var(--primary-blue), var(--soft-blue));
+            color: white;
+            border: none;
+            padding: 18px 32px;
+            font-size: 1.05rem;
+            font-weight: 600;
+            border-radius: var(--radius-small);
+            cursor: pointer;
+            transition: var(--transition);
+            box-shadow: var(--shadow-soft);
+            position: relative;
+            overflow: hidden;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0, 122, 255, 0.25);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .ripple {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.6);
+            transform: scale(0);
+            animation: rippleAnim 0.6s linear;
+            pointer-events: none;
+        }
+
+        @keyframes rippleAnim {
+            to {
+                transform: scale(4);
+                opacity: 0;
+            }
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+            color: var(--primary-blue);
+            font-weight: 500;
+        }
+
+        .loading i {
+            margin-right: 10px;
+            animation: spin 1s infinite linear;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .result-section {
+            display: none;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .result-card {
+            background: var(--white);
+            border-radius: var(--radius);
+            padding: 30px;
+            box-shadow: var(--shadow-soft);
+            border: 1px solid var(--gray-3);
+            margin-top: 20px;
+        }
+
+        .result-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 25px;
+        }
+
+        .result-header i {
+            font-size: 1.8rem;
+        }
+
+        .success .result-header i {
+            color: var(--success);
+        }
+
+        .error .result-header i {
+            color: var(--error);
+        }
+
+        .result-header h3 {
+            font-size: 1.4rem;
+            font-weight: 600;
+        }
+
+        .result-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+
+        .detail-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .detail-label {
+            font-size: 0.9rem;
+            color: var(--gray-1);
+            margin-bottom: 4px;
+        }
+
+        .detail-value {
+            font-size: 1.1rem;
+            font-weight: 500;
+            color: var(--dark);
+            word-break: break-word;
+        }
+
+        .pen-number {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            padding: 20px;
+            border-radius: var(--radius-small);
+            text-align: center;
+            border: 1px dashed var(--gray-2);
+        }
+
+        .pen-label {
+            font-size: 0.9rem;
+            color: var(--gray-1);
+            margin-bottom: 8px;
+        }
+
+        .pen-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--primary-blue);
+            letter-spacing: 2px;
+            font-family: 'Courier New', monospace;
+        }
+
+        .contact-section {
+            margin-top: 60px;
+            text-align: center;
+            animation: fadeIn 1s ease-out;
+        }
+
+        .contact-section h2 {
+            font-size: 1.6rem;
+            font-weight: 600;
+            margin-bottom: 30px;
+            color: var(--dark);
+        }
+
+        .profile-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border-radius: var(--radius);
+            padding: 40px;
+            border: 1px solid var(--glass-border);
+            box-shadow: var(--shadow);
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
+        .profile-photo {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-blue), var(--soft-blue));
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 2.5rem;
+            border: 4px solid var(--white);
+            box-shadow: var(--shadow);
+        }
+
+        .profile-info h3 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--dark);
+        }
+
+        .profile-info p {
+            color: var(--gray-1);
+            font-size: 1rem;
+            margin-bottom: 30px;
+        }
+
+        .instagram-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            background: linear-gradient(45deg, #405DE6, #833AB4, #C13584, #E1306C, #FD1D1D);
+            color: white;
+            text-decoration: none;
+            padding: 16px 32px;
+            border-radius: var(--radius-small);
+            font-weight: 600;
+            transition: var(--transition);
+            box-shadow: 0 4px 20px rgba(195, 53, 132, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .instagram-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(195, 53, 132, 0.3);
+        }
+
+        .instagram-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.7s ease;
+        }
+
+        .instagram-btn:hover::before {
+            left: 100%;
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2.2rem;
+            }
+            
+            .hero p {
+                font-size: 1.1rem;
+            }
+            
+            .glass-card {
+                padding: 30px 20px;
+            }
+            
+            .result-details {
+                grid-template-columns: 1fr;
+            }
+            
+            .pen-value {
+                font-size: 1.5rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 10px;
+            }
+            
+            .container {
+                padding: 10px;
+            }
+            
+            .hero h1 {
+                font-size: 1.8rem;
+            }
+            
+            .profile-card {
+                padding: 30px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <section class="hero">
+            <h1>Student PEN Verification System</h1>
+            <p>Secure Identity Verification Portal</p>
+            <div class="glass-card">
+                <div class="form-section">
+                    <h2><i class="fas fa-user-graduate"></i> Verification Form</h2>
+                    
+                    <form id="verificationForm">
+                        <div class="input-group">
+                            <label for="studentName">Student Name</label>
+                            <div class="input-wrapper">
+                                <i class="fas fa-user"></i>
+                                <input type="text" id="studentName" placeholder="Enter full name">
+                            </div>
+                            <div class="error-message" id="nameError"></div>
+                        </div>
+                        
+                        <div class="input-group">
+                            <label for="fatherName">Father's Name</label>
+                            <div class="input-wrapper">
+                                <i class="fas fa-user-friends"></i>
+                                <input type="text" id="fatherName" placeholder="Enter father's name">
+                            </div>
+                            <div class="error-message" id="fatherError"></div>
+                        </div>
+                        
+                        <div class="input-group">
+                            <label for="dob">Date of Birth (YYYY-MM-DD)</label>
+                            <div class="input-wrapper">
+                                <i class="fas fa-calendar-alt"></i>
+                                <input type="date" id="dob" placeholder="YYYY-MM-DD">
+                            </div>
+                            <div class="dob-hint">Format: YYYY-MM-DD (e.g., 2005-08-15)</div>
+                            <div class="error-message" id="dobError"></div>
+                        </div>
+                        
+                        <button type="submit" class="btn" id="verifyBtn">
+                            <i class="fas fa-shield-alt"></i> Verify Identity
+                        </button>
+                    </form>
+                    
+                    <div class="loading" id="loading">
+                        <i class="fas fa-spinner"></i> Verifying securely...
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="result-section" id="resultSection">
+            <div class="result-card" id="resultCard"></div>
+        </section>
+
+        <section class="contact-section">
+            <h2>Contact Us</h2>
+            <div class="profile-card">
+                <div class="profile-photo">
+                    <i class="fas fa-user-tie"></i>
+                </div>
+                <div class="profile-info">
+                    <h3>Anshuraj Hans</h3>
+                    <p>Developer / System Architect</p>
+                    <a href="https://instagram.com/anshurajhans" target="_blank" class="instagram-btn">
+                        <i class="fab fa-instagram"></i> @anshurajhans
+                    </a>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        (function() {
+            'use strict';
+            
+            const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQiYDmy7U9ccQlydHAve-WQD-met0EFD2fD8rLVPsTm5hNZG0ChPSYC2YP1d339dAm6fEfXtK3DId5L/pub?output=csv";
+            let studentData = null;
+            
+            function normalizeString(str) {
+                if (!str || typeof str !== 'string') return '';
+                return str.toLowerCase()
+                    .trim()
+                    .replace(/\s+/g, ' ')
+                    .normalize('NFKD')
+                    .replace(/[\u0300-\u036f]/g, '');
+            }
+            
+            function parseCSV(csvText) {
+                const lines = [];
+                let currentLine = [];
+                let currentField = '';
+                let inQuotes = false;
+                
+                for (let i = 0; i < csvText.length; i++) {
+                    const char = csvText[i];
+                    const nextChar = csvText[i + 1];
+                    
+                    if (char === '"') {
+                        if (inQuotes && nextChar === '"') {
+                            currentField += '"';
+                            i++;
+                        } else {
+                            inQuotes = !inQuotes;
+                        }
+                    } else if (char === ',' && !inQuotes) {
+                        currentLine.push(currentField);
+                        currentField = '';
+                    } else if (char === '\n' && !inQuotes) {
+                        currentLine.push(currentField);
+                        lines.push(currentLine);
+                        currentLine = [];
+                        currentField = '';
+                    } else if (char === '\r') {
+                        continue;
+                    } else {
+                        currentField += char;
+                    }
+                }
+                
+                if (currentField !== '' || currentLine.length > 0) {
+                    currentLine.push(currentField);
+                    lines.push(currentLine);
+                }
+                
+                if (lines.length === 0) return [];
+                
+                const headers = lines[0].map(header => 
+                    normalizeString(header.replace(/"/g, ''))
+                );
+                
+                const columnMapping = {
+                    'name': 'name',
+                    'father_name': 'father_name',
+                    'dob': 'dob',
+                    'pen_no': 'pen_no'
+                };
+                
+                const result = [];
+                
+                for (let i = 1; i < lines.length; i++) {
+                    if (lines[i].length < 4) continue;
+                    
+                    const obj = {};
+                    const row = lines[i];
+                    
+                    for (let j = 0; j < Math.min(headers.length, row.length); j++) {
+                        let header = headers[j];
+                        let value = row[j] || '';
+                        
+                        value = value.replace(/^"|"$/g, '').trim();
+                        
+                        if (header === 'dob') {
+                            const dateMatch = value.match(/(\d{4})[-/](\d{1,2})[-/](\d{1,2})/);
+                            if (dateMatch) {
+                                const year = dateMatch[1];
+                                const month = dateMatch[2].padStart(2, '0');
+                                const day = dateMatch[3].padStart(2, '0');
+                                value = `${year}-${month}-${day}`;
+                            }
+                        } else {
+                            value = normalizeString(value);
+                        }
+                        
+                        if (columnMapping[header]) {
+                            obj[columnMapping[header]] = value;
+                        }
+                    }
+                    
+                    if (obj.name && obj.father_name && obj.dob && obj.pen_no) {
+                        result.push(obj);
+                    }
+                }
+                
+                return result;
+            }
+            
+            async function fetchStudentData() {
+                try {
+                    const response = await fetch(CSV_URL);
+                    if (!response.ok) throw new Error('Network error');
+                    const csvText = await response.text();
+                    return parseCSV(csvText);
+                } catch (error) {
+                    console.error('Data fetch failed');
+                    return [];
+                }
+            }
+            
+            function findStudentMatch(name, fatherName, dob) {
+                if (!studentData || !Array.isArray(studentData)) return null;
+                
+                const normalizedName = normalizeString(name);
+                const normalizedFather = normalizeString(fatherName);
+                
+                const dobDate = new Date(dob);
+                if (isNaN(dobDate.getTime())) return null;
+                
+                const formattedDob = dobDate.toISOString().split('T')[0];
+                
+                return studentData.find(student => {
+                    return student.name === normalizedName &&
+                           student.father_name === normalizedFather &&
+                           student.dob === formattedDob;
+                });
+            }
+            
+            function createRipple(event) {
+                const button = event.currentTarget;
+                const circle = document.createElement('span');
+                const diameter = Math.max(button.clientWidth, button.clientHeight);
+                const radius = diameter / 2;
+                
+                circle.style.width = circle.style.height = `${diameter}px`;
+                circle.style.left = `${event.clientX - button.getBoundingClientRect().left - radius}px`;
+                circle.style.top = `${event.clientY - button.getBoundingClientRect().top - radius}px`;
+                circle.classList.add('ripple');
+                
+                const ripple = button.getElementsByClassName('ripple')[0];
+                if (ripple) ripple.remove();
+                
+                button.appendChild(circle);
+            }
+            
+            function showError(inputId, message) {
+                const input = document.getElementById(inputId);
+                const errorEl = document.getElementById(inputId + 'Error');
+                
+                if (input && errorEl) {
+                    input.classList.add('error');
+                    errorEl.textContent = message;
+                    errorEl.style.display = 'block';
+                }
+            }
+            
+            function clearErrors() {
+                const inputs = ['studentName', 'fatherName', 'dob'];
+                inputs.forEach(id => {
+                    const input = document.getElementById(id);
+                    const errorEl = document.getElementById(id + 'Error');
+                    
+                    if (input) input.classList.remove('error');
+                    if (errorEl) errorEl.style.display = 'none';
+                });
+            }
+            
+            function validateForm() {
+                clearErrors();
+                
+                const name = document.getElementById('studentName').value.trim();
+                const fatherName = document.getElementById('fatherName').value.trim();
+                const dob = document.getElementById('dob').value;
+                
+                let isValid = true;
+                
+                if (!name) {
+                    showError('studentName', 'Please enter student name');
+                    isValid = false;
+                }
+                
+                if (!fatherName) {
+                    showError('fatherName', "Please enter father's name");
+                    isValid = false;
+                }
+                
+                if (!dob) {
+                    showError('dob', 'Please select date of birth');
+                    isValid = false;
+                } else {
+                    const dobDate = new Date(dob);
+                    const today = new Date();
+                    
+                    if (isNaN(dobDate.getTime())) {
+                        showError('dob', 'Invalid date format. Use YYYY-MM-DD');
+                        isValid = false;
+                    } else if (dobDate > today) {
+                        showError('dob', 'Date cannot be in the future');
+                        isValid = false;
+                    }
+                    
+                    const dobPattern = /^\d{4}-\d{2}-\d{2}$/;
+                    if (!dobPattern.test(dob)) {
+                        showError('dob', 'Format must be YYYY-MM-DD');
+                        isValid = false;
+                    }
+                }
+                
+                return isValid;
+            }
+            
+            function showResult(success, data = null) {
+                const resultSection = document.getElementById('resultSection');
+                const resultCard = document.getElementById('resultCard');
+                
+                resultCard.className = 'result-card ' + (success ? 'success' : 'error');
+                
+                if (success && data) {
+                    resultCard.innerHTML = `
+                        <div class="result-header">
+                            <i class="fas fa-check-circle"></i>
+                            <h3>✅ Verified Successfully</h3>
+                        </div>
+                        <div class="result-details">
+                            <div class="detail-item">
+                                <span class="detail-label">Name</span>
+                                <span class="detail-value">${data.originalName || ''}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Father's Name</span>
+                                <span class="detail-value">${data.originalFather || ''}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Date of Birth</span>
+                                <span class="detail-value">${data.originalDob || ''}</span>
+                            </div>
+                        </div>
+                        <div class="pen-number">
+                            <div class="pen-label">PEN Number</div>
+                            <div class="pen-value">${data.pen_no || ''}</div>
+                        </div>
+                    `;
+                } else {
+                    resultCard.innerHTML = `
+                        <div class="result-header">
+                            <i class="fas fa-times-circle"></i>
+                            <h3>❌ Verification Failed</h3>
+                        </div>
+                        <div class="result-details">
+                            <p style="text-align: center; color: var(--gray-1); font-size: 1.1rem;">
+                                Record not found. Please check the information and try again.
+                            </p>
+                        </div>
+                    `;
+                }
+                
+                resultSection.style.display = 'block';
+                setTimeout(() => {
+                    resultSection.scrollIntoView({ behavior: 'smooth' });
+                }, 100);
+            }
+            
+            async function handleVerification(event) {
+                event.preventDefault();
+                
+                if (!validateForm()) {
+                    return;
+                }
+                
+                const name = document.getElementById('studentName').value;
+                const fatherName = document.getElementById('fatherName').value;
+                const dob = document.getElementById('dob').value;
+                
+                const verifyBtn = document.getElementById('verifyBtn');
+                const loading = document.getElementById('loading');
+                
+                verifyBtn.disabled = true;
+                loading.style.display = 'block';
+                
+                try {
+                    if (!studentData) {
+                        studentData = await fetchStudentData();
+                    }
+                    
+                    await new Promise(resolve => setTimeout(resolve, 800));
+                    
+                    const match = findStudentMatch(name, fatherName, dob);
+                    
+                    if (match) {
+                        match.originalName = name;
+                        match.originalFather = fatherName;
+                        match.originalDob = dob;
+                        showResult(true, match);
+                    } else {
+                        showResult(false);
+                    }
+                } catch (error) {
+                    showResult(false);
+                } finally {
+                    verifyBtn.disabled = false;
+                    loading.style.display = 'none';
+                }
+            }
+            
+            function init() {
+                const verifyBtn = document.getElementById('verifyBtn');
+                const form = document.getElementById('verificationForm');
+                const instagramBtn = document.querySelector('.instagram-btn');
+                
+                if (verifyBtn) {
+                    verifyBtn.addEventListener('click', createRipple);
+                }
+                
+                if (instagramBtn) {
+                    instagramBtn.addEventListener('click', createRipple);
+                }
+                
+                if (form) {
+                    form.addEventListener('submit', handleVerification);
+                }
+                
+                const dobInput = document.getElementById('dob');
+                if (dobInput) {
+                    const today = new Date().toISOString().split('T')[0];
+                    dobInput.max = today;
+                    
+                    dobInput.addEventListener('change', function() {
+                        if (this.value) {
+                            const date = new Date(this.value);
+                            if (!isNaN(date.getTime())) {
+                                const formatted = date.toISOString().split('T')[0];
+                                this.value = formatted;
+                            }
+                        }
+                    });
+                }
+                
+                fetchStudentData().then(data => {
+                    studentData = data;
+                });
+                
+                document.addEventListener('contextmenu', e => e.preventDefault());
+                
+                document.addEventListener('keydown', function(e) {
+                    if (e.ctrlKey && (e.key === 'u' || e.key === 's')) {
+                        e.preventDefault();
+                    }
+                });
+            }
+            
+            document.addEventListener('DOMContentLoaded', init);
+        })();
+    </script>
+</body>
+</html>
